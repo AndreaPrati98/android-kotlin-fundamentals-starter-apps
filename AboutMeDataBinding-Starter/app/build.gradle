@@ -20,7 +20,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    
     // Enable data binding here.
+    buildFeatures {
+        dataBinding true
+    }
 }
 
 dependencies {
