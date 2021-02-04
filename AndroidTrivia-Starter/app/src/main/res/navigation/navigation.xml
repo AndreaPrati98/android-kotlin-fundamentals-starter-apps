@@ -35,5 +35,9 @@
         android:id="@+id/gameOverFragment"
         android:name="com.example.android.navigation.GameOverFragment"
         android:label="fragment_game_over"
-        tools:layout="@layout/fragment_game_over" />
+        tools:layout="@layout/fragment_game_over" >
+        <action
+            android:id="@+id/action_gameOverFragment_to_titleFragment2"
+            app:destination="@id/titleFragment" />
+    </fragment>
 </navigation>
