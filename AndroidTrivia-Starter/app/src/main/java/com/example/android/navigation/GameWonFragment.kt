@@ -16,10 +16,10 @@
 
 package com.example.android.navigation
 
+import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
@@ -32,10 +32,51 @@ class GameWonFragment : Fragment() {
         val binding: FragmentGameWonBinding = DataBindingUtil.inflate(
                 inflater, R.layout.fragment_game_won, container, false)
 
+        setHasOptionsMenu(true)
+
         binding.nextMatchButton.setOnClickListener { view : View ->
-            view.findNavController().navigate(R.id.action_gameWonFragment_to_gameFragment)
+            view.findNavController().navigate(GameWonFragmentDirections.actionGameWonFragmentToGameFragment())
         }
+
+        val args = GameWonFragmentArgs.fromBundle(requireArguments())
+        Toast.makeText(context, "NumCorrect: ${args.numCorrect}, NumQuestions: ${args.numQuestion}", Toast.LENGTH_LONG).show()
+
 
         return binding.root
     }
+
+    //creating sharing intent
+    private fun getShareIntent() : Intent {
+        val args = GameWonFragmentArgs.fromBundle(requireArguments())
+        val shareIntent = Intent(Intent.ACTION_SEND)
+        shareIntent.setType("text/plain").putExtra(Intent.EXTRA_TEXT, getString(R.string.share_success_text, args.numCorrect, args.numQuestion))
+
+        return shareIntent
+    }
+
+    /**
+     * Starting activity using the intent created
+     */
+    public fun shareSuccess() {
+        startActivity(this.getShareIntent())
+    }
+
+    // Showing the Share Menu Item Dynamically
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.winner_menu, menu)
+        //se non si risolve l'activity allora non mostrare il tasto di share
+        if(getShareIntent().resolveActivity(requireActivity().packageManager)==null){
+            menu.findItem(R.id.share).isVisible = false
+        }
+    }
+
+    // Sharing from the Menu
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId){
+            R.id.share -> shareSuccess()
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
 }

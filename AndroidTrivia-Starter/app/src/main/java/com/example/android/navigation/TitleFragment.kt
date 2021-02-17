@@ -22,7 +22,7 @@ class TitleFragment : Fragment() {
                                     false)
 
         binding.playButton.setOnClickListener{ view : View ->
-            view.findNavController().navigate(R.id.action_titleFragment_to_gameFragment)
+            view.findNavController().navigate(TitleFragmentDirections.actionTitleFragmentToGameFragment())
         }
         setHasOptionsMenu(true)
 
@@ -32,6 +32,7 @@ class TitleFragment : Fragment() {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.options_menu, menu)
+
     }
 
     /**
