@@ -20,26 +20,26 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.NavHostFragment
 import com.example.android.guesstheword.R
 import com.example.android.guesstheword.databinding.GameFragmentBinding
+import timber.log.Timber
 
 /**
  * Fragment where the game is played
  */
 class GameFragment : Fragment() {
 
-    // The current word
-    private var word = ""
-
-    // The current score
-    private var score = 0
-
-    // The list of words - the front of the list is the next word to guess
-    private lateinit var wordList: MutableList<String>
-
     private lateinit var binding: GameFragmentBinding
+
+    /**
+     * The model of this view
+     */
+    private lateinit var viewModel: GameViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -52,79 +52,62 @@ class GameFragment : Fragment() {
                 false
         )
 
-        resetList()
-        nextWord()
+        Timber.i("ViewModelProvider.get() called")
+        /*
+        We use a ViewModelProvider that's basically a factory. We instantiate the
+        factory with the view and than we get the model associated.
+        Now, the question is if I can use more models for my view or not, I could.
+         */
+        viewModel = ViewModelProvider(this).get(GameViewModel::class.java)
 
-        binding.correctButton.setOnClickListener { onCorrect() }
-        binding.skipButton.setOnClickListener { onSkip() }
+        // Initialize all the button listeners
+        binding.apply {
+            correctButton.setOnClickListener { onCorrect() }
+            skipButton.setOnClickListener { onSkip() }
+            endGameButton.setOnClickListener { onEndGame() }
+        }
+
         updateScoreText()
         updateWordText()
         return binding.root
 
     }
 
+    private fun onEndGame() {
+        gameFinished()
+    }
+
     /**
-     * Resets the list of words and randomizes the order
+     * Called when the game is finisched
      */
-    private fun resetList() {
-        wordList = mutableListOf(
-                "queen",
-                "hospital",
-                "basketball",
-                "cat",
-                "change",
-                "snail",
-                "soup",
-                "calendar",
-                "sad",
-                "desk",
-                "guitar",
-                "home",
-                "railway",
-                "zebra",
-                "jelly",
-                "car",
-                "crow",
-                "trade",
-                "bag",
-                "roll",
-                "bubble"
-        )
-        wordList.shuffle()
+    private fun gameFinished() {
+        Toast.makeText(activity,"Game has just finisched", Toast.LENGTH_SHORT).show()
+        val action = GameFragmentDirections.actionGameToScore()
+        action.score = viewModel.score
+        NavHostFragment.findNavController(this).navigate(action)
     }
 
     /** Methods for buttons presses **/
-
     private fun onSkip() {
-        score--
-        nextWord()
-    }
-
-    private fun onCorrect() {
-        score++
-        nextWord()
-    }
-
-    /**
-     * Moves to the next word in the list
-     */
-    private fun nextWord() {
-        if (!wordList.isEmpty()) {
-            //Select and remove a word from the list
-            word = wordList.removeAt(0)
-        }
+        viewModel.onSkip()
         updateWordText()
         updateScoreText()
     }
 
+    private fun onCorrect() {
+        viewModel.onCorrect()
+        updateWordText()
+        updateScoreText()
+    }
 
     /** Methods for updating the UI **/
-
     private fun updateWordText() {
-        binding.wordText.text = word
+        binding.wordText.text = viewModel.word
     }
 
     private fun updateScoreText() {
-        binding.scoreText.text = score.toString()
+        binding.scoreText.text = viewModel.score.toString()
     }
+
 }
+
